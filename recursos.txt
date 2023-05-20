@@ -1,2 +1,3 @@
 
 https://openlibra.com/es/collection/search/category/ajedrez/
+https://redirect.cs.umbc.edu/courses/graduate/CMSC671/fall15/resources/ProgrammingaComputerforPlayingChess.pdf
