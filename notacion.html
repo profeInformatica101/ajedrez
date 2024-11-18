@@ -22,21 +22,12 @@
             height: 100%;
         }
 
-        @media (max-width: 480px) {
-  .contenedor {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-                /* Para pantallas pequeñas (móviles) */
-@media screen and (max-width: 768px) {
-  .contenedor {
-    display: flex;
-    flex-direction: column; /* Apila los elementos en vertical */
-    align-items: center;    /* Centra los elementos */
-  }
+    @media (max-width: 768px) {
+      .contenedor {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
 
   .icono {
     margin-bottom: 10px; /* Espacio entre elementos */
