@@ -9,6 +9,21 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <style>
+
+        /* Detecta orientación vertical (portrait) */
+@media screen and (orientation: portrait) {
+  .contenedor {
+    flex-direction: column; /* Apila elementos en vertical */
+  }
+}
+
+/* Detecta orientación horizontal (landscape) */
+@media screen and (orientation: landscape) {
+  .contenedor {
+    flex-direction: row; /* Alinea elementos en horizontal */
+    justify-content: center;
+  }
+}
         .responsive-iframe {
             position: relative;
             overflow: hidden;
