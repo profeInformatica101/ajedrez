@@ -23,31 +23,7 @@
             height: 100%;
             border: 0;
         }
-        /* Para pantallas pequeñas (móviles) */
-        @media screen and (max-width: 768px) {
-            .contenedor {
-                display: flex;
-                flex-direction: column; /* Apila los elementos en vertical */
-                align-items: center;
-            }
-        }
- /* Diseño en orientación vertical (portrait) */
-@media screen and (orientation: portrait) {
-  body {
-    transform: rotate(0deg); /* Sin rotación */
-  }
-}
-
-/* Diseño en orientación horizontal (landscape) */
-@media screen and (orientation: landscape) {
-  body {
-    transform: rotate(-90deg); /* Gira todo el contenido */
-    transform-origin: center; /* Asegura el giro desde el centro */
-    height: 100vw; /* Ajusta el alto para coincidir con el ancho del dispositivo */
-    width: 100vh; /* Ajusta el ancho para coincidir con el alto del dispositivo */
-    overflow: hidden; /* Evita que aparezcan barras de desplazamiento */
-  }
-}
+  
     </style>
 </head>
 <body>
