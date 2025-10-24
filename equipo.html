@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>♖ G♘mb♗to de C♞m♞s ♜ · IES Camas</title>
+  <meta name="description" content="IES Camas · G♘mb♗to de C♞m♞s: lema vivo, etimología, directos de Lichess, próximos torneos y problemas de táctica." />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+  <style>
+    :root{ --sw-yellow:#ffe81f; --sw-outline:#000; }
+    body{ background: radial-gradient(ellipse at top, #0b0f19 0%, #05070d 60%, #000 100%); color:#e9ecef; min-height:100vh; }
+    /* Fondo de estrellas */
+    .stars, .stars:before, .stars:after{ content:""; position:fixed; inset:0; background-repeat:repeat; background-image:
+      radial-gradient(2px 2px at 20px 30px, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 80px 120px, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 200px 50px, #fff 50%, transparent 51%),
+      radial-gradient(2px 2px at 300px 200px, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 400px 150px, #fff 50%, transparent 51%);
+      background-size:500px 500px; opacity:.2; pointer-events:none; }
+    .stars:before{ transform:translateY(-10%); opacity:.25 }
+    .stars:after{ transform:translateY(10%); opacity:.15 }
+
+    .star-wars{ font-family:'Audiowide',system-ui; color:var(--sw-yellow); text-transform:uppercase; letter-spacing:2px;
+      text-shadow:2px 2px 0 var(--sw-outline), -2px 2px 0 var(--sw-outline), 2px -2px 0 var(--sw-outline), -2px -2px 0 var(--sw-outline), 0 0 12px rgba(255,232,31,.35); }
+
+    .section-card{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); backdrop-filter:blur(3px); border-radius:1rem; box-shadow:0 0 20px rgba(0,0,0,.35); }
+    .btn-lichess{ --bs-btn-color:#111; --bs-btn-bg:var(--sw-yellow); --bs-btn-border-color:var(--sw-yellow); --bs-btn-hover-bg:#ffd200; --bs-btn-hover-border-color:#ffd200; }
+    a, a:hover{ color:#9bd1ff }
+    .subtitle{ color:#adb5bd }
+    .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace }
+
+    /* Lema dinámico */
+    .lema-wrap{ min-height:7.5rem; display:flex; align-items:center; justify-content:center; text-align:center; }
+    .lema{ font-family:'Audiowide',sans-serif; color:var(--sw-yellow); text-shadow:0 0 10px rgba(255,232,31,.3); font-size:1.35rem; line-height:1.35; margin:0; opacity:0; transform:translateY(10px); transition:opacity .6s ease, transform .6s ease; cursor:pointer }
+    .lema.show{ opacity:1; transform:translateY(0); }
+    .lema small{ display:block; margin-top:.35rem; font-style:italic; color:#e9e3b0 }
+
+    @media (min-width:768px){ .lema{ font-size:1.6rem } }
+
+    /* Torneos */
+    .badge-live{ background:#d63384; }
+    .badge-upcoming{ background:#20c997; color:#111; }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <header class="container py-5 text-center">
+    <h1 class="display-5 star-wars mb-2">♖ G♘mb♗to de C♞m♞s ♜</h1>
+    <p class="lead subtitle">«Su dominio es <span class="mono">futūrus</span> — lo que ha de ser.»</p>
+  </header>
+
+  <!-- Lema dinámico -->
+  <section class="container mb-5" aria-labelledby="titulo-lema">
+    <div class="section-card p-4 p-md-5 text-center">
+
+      <div class="lema-wrap" aria-live="polite">
+        <p id="lema" class="lema" title="Haz clic para ver otro lema"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Etimología -->
+  <section class="container mb-5">
+    <div class="section-card p-4 p-md-5">
+      <h2 class="h4 star-wars mb-4">♟️ Etimología de “ajedrez”</h2>
+      <p>
+        La palabra <strong>ajedrez</strong> viene del árabe hispánico <em>aššaṭranj</em>,
+        que a su vez procede del árabe clásico <em>šaṭranj</em>, y este del persa medio <em>čatrang</em>,
+        derivado finalmente del sánscrito <em>chatur‑aṅga</em>, que significa literalmente
+        <strong>“de cuatro partes”</strong> o <strong>“cuatro miembros”</strong>, refiriéndose a las cuatro unidades del ejército antiguo indio:
+        infantería, caballería, elefantes y carros de guerra.
+      </p>
+      <p>Así que el ajedrez nació como una metáfora del arte militar y de la estrategia.</p>
+    </div>
+  </section>
+
+  <!-- Unirse al equipo -->
+  <section id="unete" class="container mb-5">
+    <div class="section-card p-4 p-md-5 d-flex flex-column flex-md-row align-items-center gap-4">
+      <div class="flex-fill">
+        <h2 class="h4 star-wars mb-3">Únete al equipo en Lichess</h2>
+        <p class="mb-0">Forma parte del <span class="fw-semibold">Equipo de Ajedrez del IES Camas</span> en Lichess. Torneos, retos y aprendizaje colaborativo.</p>
+      </div>
+      <div>
+        <a id="teamLink" class="btn btn-lichess btn-lg px-4" href="https://lichess.org/team/iescamas" target="_blank" rel="noopener">Ir al equipo</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Directo automático del mejor jugador activo -->
+  <section id="directos" class="container mb-5">
+    <div class="section-card p-4 p-md-5">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h4 star-wars mb-0">Directo: mejor jugador activo ahora</h2>
+        <small class="subtitle">Fuente: Lichess API · auto‑actualiza</small>
+      </div>
+      <div id="liveContainer" class="ratio ratio-16x9 rounded overflow-hidden bg-black"></div>
+      <div class="mt-3 small subtitle">Si nadie del equipo está jugando, verás Lichess TV.</div>
+    </div>
+  </section>
+
+  <!-- Próximos torneos del equipo -->
+  <section id="torneos" class="container mb-5">
+    <div class="section-card p-4 p-md-5">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h4 star-wars mb-0">Próximos torneos del equipo</h2>
+        <small class="subtitle">Se actualiza automáticamente desde Lichess</small>
+      </div>
+      <div id="torneosContainer" class="table-responsive">
+        <table class="table table-dark table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Fecha y hora</th>
+              <th>Nombre</th>
+              <th>Estado</th>
+              <th class="text-end">Jugadores</th>
+            </tr>
+          </thead>
+          <tbody id="torneosBody">
+            <tr><td colspan="4" class="text-center text-muted">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-2 small subtitle">Zona horaria: Europa/Madrid</div>
+    </div>
+  </section>
+
+  <!-- Problemas de Lichess -->
+  <section id="problemas" class="container mb-5">
+    <div class="section-card p-4 p-md-5">
+      <h2 class="h4 star-wars mb-3">Problemas de táctica</h2>
+      <div class="ratio ratio-16x9 rounded overflow-hidden bg-black">
+        <iframe src="https://lichess.org/training/frame?theme=auto&bg=auto" title="Lichess Puzzles" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div class="mt-2 small subtitle">Resuelve tácticas directamente aquí. Se adapta a tu nivel en Lichess.</div>
+    </div>
+  </section>
+
+  <footer class="container pb-5 text-center text-muted">
+    <hr class="border-secondary opacity-25" />
+    <p class="mb-0">♖ G♘mb♗to de C♞m♞s ♜ · <span class="mono">futūrus</span></p>
+  </footer>
+
+  <script>
+    // === CONFIGURACIÓN ===
+    const TEAM_ID = 'iescamas'; // slug real del equipo en Lichess
+
+    // Frases aleatorias para el lema
+    const FRASES = [
+      "El ajedrez se juega en el presente, pero se gana en el futuro.",
+      "Cada jugada es una historia escrita con inteligencia.",
+      "Quien domina el tablero, domina el tiempo.",
+      "No muevas por mover: imagina el porvenir.",
+      "♖ G♘mb♗to de C♞m♞s ♜ — donde pensar es una forma de arte.",
+      "La paciencia es la espada del ajedrecista.",
+      "Como Atenea, protege tu mente y vence con sabiduría.",
+      "La estrategia es ver el futuro que otros aún no ven.",
+      "En el silencio del tablero se escuchan los ecos de la victoria.",
+      "Se juega en el ahora para conquistar lo que será.",
+      // Versión original completa (con firma)
+      "El ajedrez se juega en el presente,\npero se gana en el futuro.\nLa capacidad de imaginar y crear el porvenir.\n<Oh bendita Diosa Atenea nos guarde>"
+    ];
+
+    // === LEMA DINÁMICO ===
+    const lemaEl = document.getElementById('lema');
+    function renderFrase(text){ return text.split('\n').map(l => `<span>${l}</span>`).join('<br>'); }
+    function cambiarFrase(){
+      const i = Math.floor(Math.random() * FRASES.length);
+      lemaEl.classList.remove('show');
+      setTimeout(() => { lemaEl.innerHTML = renderFrase(FRASES[i]); lemaEl.classList.add('show'); }, 200);
+    }
+    lemaEl.addEventListener('click', cambiarFrase);
+    cambiarFrase(); // inicial
+    setInterval(cambiarFrase, 12000);
+
+    // === DIRECTO LICHESS (mejor jugador activo) ===
+    const liveContainer = document.getElementById('liveContainer');
+
+    async function fetchTeamUsers(teamId){
+      const res = await fetch(`https://lichess.org/api/team/${teamId}/users`, { headers: { 'Accept': 'application/x-ndjson' } });
+      if(!res.ok) throw new Error('No se pudo obtener la lista de usuarios del equipo');
+      const text = await res.text();
+      const lines = text.split('\n').filter(Boolean);
+      return lines.map(l => { try{ const u = JSON.parse(l); return { id:u.id, username:u.username||u.id, blitzRating:u.perfs?.blitz?.rating || u.perfs?.rapid?.rating || u.perfs?.bullet?.rating || 1200 }; } catch(e){ return null } }).filter(Boolean);
+    }
+
+    async function fetchStatuses(ids){
+      const url = `https://lichess.org/api/users/status?ids=${ids.join(',')}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('No se pudo obtener el estado de usuarios');
+      return res.json(); // [{id,name,online,playing,playingId}, ...]
+    }
+
+    function setIframe(src){
+      liveContainer.innerHTML = '';
+      const ifr = document.createElement('iframe');
+      ifr.src = src; ifr.title = 'Partida en directo'; ifr.frameBorder = '0'; ifr.allowFullscreen = true;
+      liveContainer.appendChild(ifr);
+    }
+
+    async function showBestActiveGame(){
+      try{
+        const users = await fetchTeamUsers(TEAM_ID);
+        if(!users.length) throw new Error('Equipo sin usuarios');
+        const ids = users.map(u => u.id);
+        const status = await fetchStatuses(ids);
+        const byId = new Map(status.map(s => [s.id, s]));
+        const playing = users.map(u => ({...u, st:byId.get(u.id)})).filter(u => u.st && u.st.playing && u.st.playingId);
+        if(playing.length){
+          playing.sort((a,b) => (b.blitzRating||0) - (a.blitzRating||0));
+          const best = playing[0];
+          setIframe(`https://lichess.org/embed/${best.st.playingId}?theme=auto&bg=auto&autoplay=1`);
+        } else {
+          setIframe('https://lichess.org/tv/frame?theme=auto&bg=auto');
+        }
+      } catch(err){ console.warn(err); setIframe('https://lichess.org/tv/frame?theme=auto&bg=auto'); }
+    }
+
+    showBestActiveGame();
+    setInterval(showBestActiveGame, 60000);
+
+    // === PRÓXIMOS TORNEOS DEL EQUIPO ===
+    const torneosBody = document.getElementById('torneosBody');
+    const fmt = new Intl.DateTimeFormat('es-ES', { dateStyle:'medium', timeStyle:'short', timeZone:'Europe/Madrid' });
+
+    async function fetchTeamArenas(teamId){
+      const res = await fetch(`https://lichess.org/api/team/${teamId}/arena`, { headers: { 'Accept': 'application/x-ndjson' } });
+      if(!res.ok) throw new Error('No se pudo obtener la lista de torneos');
+      const text = await res.text();
+      const lines = text.split('\n').filter(Boolean);
+      return lines.map(l => { try{ return JSON.parse(l); } catch(e){ return null } }).filter(Boolean);
+    }
+
+    function estadoTorneo(t){
+      const now = Date.now();
+      const start = t.startsAt ?? t.createdAt ?? 0; // ms
+      const finish = t.finishesAt ?? (start + (t.minutes||0)*60*1000);
+      if (now < start) return { label:'Programado', badge:'upcoming' };
+      if (now >= start && now <= finish) return { label:'En curso', badge:'live' };
+      return { label:'Finalizado', badge:'secondary' };
+    }
+
+    function renderTorneos(list){
+      // mostrar próximos (programados) y en curso, ordenados por fecha de inicio
+      const now = Date.now();
+      const filtered = list.filter(t => {
+        const start = t.startsAt ?? t.createdAt ?? 0;
+        const finish = t.finishesAt ?? (start + (t.minutes||0)*60*1000);
+        return start >= now - 2*60*60*1000; // mostrar en curso y los que empiezan pronto
+      }).sort((a,b) => (a.startsAt||a.createdAt||0) - (b.startsAt||b.createdAt||0));
+
+      if(!filtered.length){
+        torneosBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No hay torneos programados por ahora. ¡Prepárate para la próxima batalla!</td></tr>`;
+        return;
+      }
+
+      const rows = filtered.map(t => {
+        const start = t.startsAt ?? t.createdAt ?? 0;
+        const fecha = start ? fmt.format(new Date(start)) : '-';
+        const nombre = t.fullName || t.name || `Torneo ${t.id}`;
+        const url = `https://lichess.org/tournament/${t.id}`;
+        const estado = estadoTorneo(t);
+        const nb = t.nbPlayers ?? '-';
+        const badgeClass = estado.badge === 'upcoming' ? 'badge-upcoming' : (estado.badge === 'live' ? 'badge-live' : 'bg-secondary');
+        return `
+          <tr>
+            <td>${fecha}</td>
+            <td><a href="${url}" target="_blank" rel="noopener">${nombre}</a></td>
+            <td><span class="badge ${badgeClass}">${estado.label}</span></td>
+            <td class="text-end">${nb}</td>
+          </tr>
+        `;
+      }).join('');
+
+      torneosBody.innerHTML = rows;
+    }
+
+    async function loadTorneos(){
+      try{
+        torneosBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Cargando…</td></tr>`;
+        const arenas = await fetchTeamArenas(TEAM_ID);
+        renderTorneos(arenas);
+      } catch(e){
+        console.warn(e);
+        torneosBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No se pudieron cargar los torneos ahora.</td></tr>`;
+      }
+    }
+
+    loadTorneos();
+    // refresca cada 5 minutos
+    setInterval(loadTorneos, 5*60*1000);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
