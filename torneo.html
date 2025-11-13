@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Torneo de Ajedrez – Liga 6 equipos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .table-sticky-header thead th {
+      position: sticky;
+      top: 0;
+      background-color: #f8f9fa;
+      z-index: 1;
+    }
+    .small-note {
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+  <div class="container-fluid">
+    <span class="navbar-brand">Torneo de Ajedrez – Liga 6 equipos</span>
+  </div>
+</nav>
+
+<div class="container mb-4">
+
+  <!-- Panel de control -->
+  <div class="card mb-3">
+    <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+      <button id="btnReset" class="btn btn-outline-danger btn-sm">
+        Reiniciar torneo
+      </button>
+
+      <button id="btnImport" class="btn btn-outline-primary btn-sm">
+        Importar JSON
+      </button>
+      <button id="btnExport" class="btn btn-primary btn-sm">
+        Exportar JSON
+      </button>
+      <input
+        type="file"
+        id="jsonFileInput"
+        accept="application/json"
+        class="d-none"
+      >
+
+      <div class="ms-auto d-flex flex-wrap gap-2">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text">Jornada</span>
+          <select id="filterJornada" class="form-select">
+            <option value="all">Todas</option>
+            <option value="1">Jornada 1</option>
+            <option value="2">Jornada 2</option>
+            <option value="3">Jornada 3</option>
+            <option value="4">Jornada 4</option>
+            <option value="5">Jornada 5</option>
+          </select>
+        </div>
+        <span class="badge bg-secondary" id="statusBadge">
+          0 / 0 partidas jugadas
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ayuda rápida -->
+  <div class="alert alert-info small-note">
+    <strong>Uso:</strong>
+    <ol class="mb-0">
+      <li>Cada fila es una partida entre dos equipos, organizada por <strong>jornada</strong> (5 en total) y <strong>mesa</strong> (1, 2 o 3).</li>
+      <li>Por defecto, las 15 partidas ya están repartidas (liga todos contra todos: 6 equipos → 5 jornadas × 3 mesas).</li>
+      <li>Si falta alguien, puedes cambiar los equipos con los desplegables, y anotar quién ha sustituido a quién en <em>Notas</em>.</li>
+      <li>Marca el resultado: gana A, gana B o tablas. La clasificación se actualiza sola.</li>
+      <li>El estado se guarda en este navegador. Usa <strong>Exportar JSON</strong> para copia de seguridad y <strong>Importar JSON</strong> para continuar en otro ordenador.</li>
+    </ol>
+  </div>
+
+  <!-- Leyenda de equipos -->
+  <div class="card mb-3">
+    <div class="card-header">
+      Equipos
+    </div>
+    <div class="card-body d-flex flex-wrap gap-2" id="teamsLegend"></div>
+  </div>
+
+  <div class="row">
+    <!-- Tabla de partidas -->
+    <div class="col-lg-8 mb-3">
+      <div class="card">
+        <div class="card-header">
+          Calendario de partidas (liga todos contra todos)
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height: 60vh;">
+            <table class="table table-sm table-striped mb-0 table-sticky-header align-middle">
+              <thead>
+                <tr>
+                  <th class="text-center">#</th>
+                  <th class="text-center">Jornada</th>
+                  <th class="text-center">Mesa</th>
+                  <th>Equipo A</th>
+                  <th class="text-center">vs</th>
+                  <th>Equipo B</th>
+                  <th>Recreo / Fecha</th>
+                  <th>Resultado</th>
+                  <th>Notas</th>
+                </tr>
+              </thead>
+              <tbody id="matchesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clasificación -->
+    <div class="col-lg-4 mb-3">
+      <div class="card">
+        <div class="card-header">
+          Clasificación
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0 align-middle text-center">
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th>Equipo</th>
+                <th>PJ</th>
+                <th>PG</th>
+                <th>PE</th>
+                <th>PP</th>
+                <th>Pts</th>
+              </tr>
+            </thead>
+            <tbody id="standingsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ============================================================================
+   CONFIGURACIÓN Y CONSTANTES
+   ========================================================================== */
+
+const STORAGE_KEY = 'torneoAjedrezLiga6';
+
+/**
+ * Definición fija de equipos (6 equipos → 3 mesas por jornada).
+ * Iconos e identificación visual con badges de Bootstrap.
+ */
+const TEAM_DEFINITIONS = [
+  { id: 'rojo',     name: 'Rojo',     icon: '♜', badgeClass: 'text-bg-danger'   },
+  { id: 'verde',    name: 'Verde',    icon: '♝', badgeClass: 'text-bg-success'  },
+  { id: 'azul',     name: 'Azul',     icon: '♞', badgeClass: 'text-bg-primary'  },
+  { id: 'amarillo', name: 'Amarillo', icon: '♛', badgeClass: 'text-bg-warning'  },
+  { id: 'negro',    name: 'Negro',    icon: '♚', badgeClass: 'text-bg-dark'     },
+  { id: 'blanco',   name: 'Blanco',   icon: '♕', badgeClass: 'text-bg-light border' }
+];
+
+/**
+ * Mapa id → info de equipo para acceso rápido.
+ */
+const TEAM_MAP = TEAM_DEFINITIONS.reduce((map, team) => {
+  map[team.id] = team;
+  return map;
+}, {});
+
+/**
+ * Devuelve la información visual de un equipo.
+ */
+function getTeamInfo(teamId, fallbackName = '') {
+  if (TEAM_MAP[teamId]) return TEAM_MAP[teamId];
+  return {
+    id: teamId,
+    name: fallbackName || teamId,
+    icon: '♟',
+    badgeClass: 'text-bg-secondary'
+  };
+}
+
+/* ============================================================================
+   GENERACIÓN INICIAL DEL TORNEO
+   ========================================================================== */
+
+/**
+ * Genera la estructura inicial:
+ * - 6 equipos fijos
+ * - Liga a doble equipo: todos contra todos una vez
+ * - 5 jornadas × 3 mesas (15 partidas)
+ *
+ * La tabla de emparejamientos es una forma estándar de round-robin
+ * para 6 equipos (Berger).
+ *
+ * Orden de equipos:
+ *  1: Rojo
+ *  2: Verde
+ *  3: Azul
+ *  4: Amarillo
+ *  5: Negro
+ *  6: Blanco
+ */
+function createInitialState() {
+  const teams = TEAM_DEFINITIONS.map(t => ({ id: t.id, name: t.name }));
+
+  // Tabla de jornadas: [ [ [equipoAId, equipoBId], ... ], ... ]
+  const scheduleRounds = [
+    // Jornada 1
+    [
+      ['rojo',   'blanco'],   // Mesa 1
+      ['verde',  'negro'],    // Mesa 2
+      ['azul',   'amarillo']  // Mesa 3
+    ],
+    // Jornada 2
+    [
+      ['blanco', 'amarillo'],
+      ['negro',  'azul'],
+      ['rojo',   'verde']
+    ],
+    // Jornada 3
+    [
+      ['verde',  'blanco'],
+      ['azul',   'rojo'],
+      ['amarillo','negro']
+    ],
+    // Jornada 4
+    [
+      ['blanco', 'negro'],
+      ['rojo',   'amarillo'],
+      ['verde',  'azul']
+    ],
+    // Jornada 5
+    [
+      ['azul',   'blanco'],
+      ['amarillo','verde'],
+      ['negro',  'rojo']
+    ]
+  ];
+
+  const matches = [];
+  let idCounter = 1;
+
+  scheduleRounds.forEach((round, roundIndex) => {
+    round.forEach((pair, tableIndex) => {
+      const [teamAId, teamBId] = pair;
+      matches.push({
+        id: idCounter++,
+        jornada: roundIndex + 1,
+        table: tableIndex + 1,
+        teamA: teamAId,
+        teamB: teamBId,
+        slot: '',          // Recreo / fecha
+        result: 'pending', // 'pending', 'A', 'B', 'D'
+        note: ''           // Notas (sustituciones, etc.)
+      });
+    });
+  });
+
+  return { teams, matches };
+}
+
+/* ============================================================================
+   PERSISTENCIA EN LOCALSTORAGE
+   ========================================================================== */
+
+/**
+ * Carga el estado desde localStorage.
+ * Si no hay datos o son inválidos, devuelve null.
+ * También migra datos antiguos (sin jornada/mesa) si hace falta.
+ */
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !Array.isArray(data.teams) || !Array.isArray(data.matches)) {
+      return null;
+    }
+
+    // Migración simple: si alguna partida no tiene jornada, la repartimos
+    const needsMigration = data.matches.some(m => m.jornada == null || m.table == null);
+    if (needsMigration) {
+      data.matches.sort((a, b) => a.id - b.id);
+      data.matches.forEach((m, index) => {
+        m.jornada = Math.floor(index / 3) + 1;  // 3 partidas por jornada
+        m.table   = (index % 3) + 1;            // Mesa 1..3
+      });
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error cargando estado:', err);
+    return null;
+  }
+}
+
+/**
+ * Guarda el estado en localStorage.
+ */
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/* ============================================================================
+   RENDERIZADO DE LEYENDA Y CLASIFICACIÓN
+   ========================================================================== */
+
+/**
+ * Renderiza la leyenda de equipos (badges con iconos y colores).
+ */
+function renderTeamsLegend(container) {
+  container.innerHTML = '';
+  TEAM_DEFINITIONS.forEach(team => {
+    const span = document.createElement('span');
+    span.className = `badge ${team.badgeClass} p-2`;
+    span.innerHTML = `<span style="font-size:1.2rem;">${team.icon}</span> ${team.name}`;
+    container.appendChild(span);
+  });
+}
+
+/**
+ * Calcula las estadísticas de clasificación en base al estado.
+ */
+function computeStandings(state) {
+  const stats = {};
+
+  // Inicializar
+  state.teams.forEach(team => {
+    stats[team.id] = {
+      id:     team.id,
+      name:   team.name,
+      played: 0,
+      wins:   0,
+      draws:  0,
+      losses: 0,
+      points: 0
+    };
+  });
+
+  // Procesar resultados
+  state.matches.forEach(match => {
+    if (!match.result || match.result === 'pending') return;
+    const teamA = stats[match.teamA];
+    const teamB = stats[match.teamB];
+    if (!teamA || !teamB) return;
+
+    teamA.played++;
+    teamB.played++;
+
+    if (match.result === 'A') {
+      teamA.wins++;
+      teamB.losses++;
+      teamA.points += 3;
+    } else if (match.result === 'B') {
+      teamB.wins++;
+      teamA.losses++;
+      teamB.points += 3;
+    } else if (match.result === 'D') {
+      teamA.draws++;
+      teamB.draws++;
+      teamA.points += 1;
+      teamB.points += 1;
+    }
+  });
+
+  // Ordenar por puntos, luego victorias, luego nombre
+  return Object.values(stats).sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.wins !== a.wins)     return b.wins - a.wins;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/**
+ * Renderiza la clasificación en la tabla correspondiente.
+ */
+function renderStandings(state, standingsBody) {
+  const tableData = computeStandings(state);
+  standingsBody.innerHTML = '';
+
+  tableData.forEach((team, index) => {
+    const tr = document.createElement('tr');
+    if (index === 0) {
+      tr.classList.add('table-success');
+    }
+
+    const info = getTeamInfo(team.id, team.name);
+
+    const tdPos = document.createElement('td');
+    tdPos.textContent = index + 1;
+
+    const tdName = document.createElement('td');
+    tdName.innerHTML =
+      `<span class="badge ${info.badgeClass}">${info.icon} ${info.name}</span>`;
+
+    const tdPJ = document.createElement('td');
+    tdPJ.textContent = team.played;
+
+    const tdPG = document.createElement('td');
+    tdPG.textContent = team.wins;
+
+    const tdPE = document.createElement('td');
+    tdPE.textContent = team.draws;
+
+    const tdPP = document.createElement('td');
+    tdPP.textContent = team.losses;
+
+    const tdPts = document.createElement('td');
+    tdPts.textContent = team.points;
+
+    tr.appendChild(tdPos);
+    tr.appendChild(tdName);
+    tr.appendChild(tdPJ);
+    tr.appendChild(tdPG);
+    tr.appendChild(tdPE);
+    tr.appendChild(tdPP);
+    tr.appendChild(tdPts);
+
+    standingsBody.appendChild(tr);
+  });
+}
+
+/* ============================================================================
+   RENDERIZADO DE PARTIDAS (CALENDARIO)
+   ========================================================================== */
+
+/**
+ * Crea un <select> de equipos para Equipo A o B.
+ */
+function createTeamSelect(which, match, state, onChangeCallback) {
+  const select = document.createElement('select');
+  select.className = 'form-select form-select-sm';
+
+  state.teams.forEach(team => {
+    const info = getTeamInfo(team.id, team.name);
+    const opt = document.createElement('option');
+    opt.value = team.id;
+    // En option sólo texto plano
+    opt.textContent = `${info.icon} ${info.name}`;
+    select.appendChild(opt);
+  });
+
+  select.value = which === 'A' ? match.teamA : match.teamB;
+
+  select.addEventListener('change', () => {
+    if (which === 'A') {
+      match.teamA = select.value;
+    } else {
+      match.teamB = select.value;
+    }
+
+    if (match.teamA === match.teamB) {
+      alert('Un equipo no puede jugar contra sí mismo. Cambia uno de los dos.');
+    }
+
+    onChangeCallback();
+  });
+
+  return select;
+}
+
+/**
+ * Renderiza el estado de partidas jugadas en el badge superior.
+ */
+function updateStatusBadge(state, statusBadge) {
+  const played = state.matches.filter(
+    m => m.result && m.result !== 'pending'
+  ).length;
+  const total = state.matches.length;
+  statusBadge.textContent = `${played} / ${total} partidas jugadas`;
+}
+
+/**
+ * Renderiza la tabla de partidas, respetando el filtro de jornada.
+ */
+function renderMatches(state, matchesBody, filterJornadaValue, onStateChanged) {
+  matchesBody.innerHTML = '';
+
+  const filter = filterJornadaValue === 'all'
+    ? null
+    : parseInt(filterJornadaValue, 10);
+
+  state.matches
+    .filter(m => (filter === null || m.jornada === filter))
+    .sort((a, b) => {
+      if (a.jornada !== b.jornada) return a.jornada - b.jornada;
+      if (a.table   !== b.table)   return a.table   - b.table;
+      return a.id - b.id;
+    })
+    .forEach(match => {
+      const tr = document.createElement('tr');
+      tr.dataset.matchId = match.id;
+
+      // #
+      const tdId = document.createElement('td');
+      tdId.textContent = match.id;
+      tdId.classList.add('text-muted', 'text-center');
+
+      // Jornada
+      const tdJornada = document.createElement('td');
+      tdJornada.textContent = match.jornada;
+      tdJornada.classList.add('text-center');
+
+      // Mesa
+      const tdMesa = document.createElement('td');
+      tdMesa.textContent = match.table;
+      tdMesa.classList.add('text-center');
+
+      // Equipo A
+      const tdTeamA = document.createElement('td');
+      tdTeamA.appendChild(createTeamSelect('A', match, state, onStateChanged));
+
+      // vs
+      const tdVs = document.createElement('td');
+      tdVs.textContent = 'vs';
+      tdVs.classList.add('text-center', 'fw-semibold');
+
+      // Equipo B
+      const tdTeamB = document.createElement('td');
+      tdTeamB.appendChild(createTeamSelect('B', match, state, onStateChanged));
+
+      // Recreo / fecha
+      const tdSlot = document.createElement('td');
+      const inputSlot = document.createElement('input');
+      inputSlot.type = 'text';
+      inputSlot.className = 'form-control form-control-sm';
+      inputSlot.placeholder = 'Ej: Lunes 1º recreo';
+      inputSlot.value = match.slot || '';
+      inputSlot.addEventListener('change', () => {
+        match.slot = inputSlot.value;
+        onStateChanged();
+      });
+      tdSlot.appendChild(inputSlot);
+
+      // Resultado
+      const tdResult = document.createElement('td');
+      const selectResult = document.createElement('select');
+      selectResult.className = 'form-select form-select-sm';
+
+      [
+        { value: 'pending', label: 'Pendiente' },
+        { value: 'A',       label: 'Gana Equipo A' },
+        { value: 'B',       label: 'Gana Equipo B' },
+        { value: 'D',       label: 'Tablas' }
+      ].forEach(optData => {
+        const opt = document.createElement('option');
+        opt.value = optData.value;
+        opt.textContent = optData.label;
+        selectResult.appendChild(opt);
+      });
+
+      selectResult.value = match.result || 'pending';
+      selectResult.addEventListener('change', () => {
+        match.result = selectResult.value;
+        onStateChanged(true); // true → recalcular también clasificación
+      });
+      tdResult.appendChild(selectResult);
+
+      // Notas
+      const tdNote = document.createElement('td');
+      const inputNote = document.createElement('input');
+      inputNote.type = 'text';
+      inputNote.className = 'form-control form-control-sm';
+      inputNote.placeholder = 'Ej: juega Ana por Juan';
+      inputNote.value = match.note || '';
+      inputNote.addEventListener('change', () => {
+        match.note = inputNote.value;
+        onStateChanged();
+      });
+      tdNote.appendChild(inputNote);
+
+      tr.appendChild(tdId);
+      tr.appendChild(tdJornada);
+      tr.appendChild(tdMesa);
+      tr.appendChild(tdTeamA);
+      tr.appendChild(tdVs);
+      tr.appendChild(tdTeamB);
+      tr.appendChild(tdSlot);
+      tr.appendChild(tdResult);
+      tr.appendChild(tdNote);
+
+      matchesBody.appendChild(tr);
+    });
+}
+
+/* ============================================================================
+   INICIALIZACIÓN DE LA APP
+   ========================================================================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Referencias a elementos del DOM
+  const matchesBody      = document.getElementById('matchesBody');
+  const standingsBody    = document.getElementById('standingsBody');
+  const statusBadge      = document.getElementById('statusBadge');
+  const btnImport        = document.getElementById('btnImport');
+  const btnExport        = document.getElementById('btnExport');
+  const btnReset         = document.getElementById('btnReset');
+  const fileInput        = document.getElementById('jsonFileInput');
+  const filterJornadaSel = document.getElementById('filterJornada');
+  const teamsLegend      = document.getElementById('teamsLegend');
+
+  // Estado de la aplicación
+  let state = loadState() || createInitialState();
+
+  /**
+   * Se ejecuta siempre que cambie algo del estado.
+   * @param {boolean} recalcStandings - si true, recalcula clasificación.
+   */
+  function handleStateChanged(recalcStandings = false) {
+    saveState(state);
+    updateStatusBadge(state, statusBadge);
+    if (recalcStandings) {
+      renderStandings(state, standingsBody);
+    }
+  }
+
+  // Render inicial
+  renderTeamsLegend(teamsLegend);
+  renderMatches(state, matchesBody, filterJornadaSel.value, handleStateChanged);
+  renderStandings(state, standingsBody);
+  updateStatusBadge(state, statusBadge);
+
+  /* ----------------- Eventos de botones y filtros ----------------- */
+
+  // Cambiar filtro de jornada
+  filterJornadaSel.addEventListener('change', () => {
+    renderMatches(state, matchesBody, filterJornadaSel.value, handleStateChanged);
+  });
+
+  // Importar JSON
+  btnImport.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data || !Array.isArray(data.teams) || !Array.isArray(data.matches)) {
+          alert('El archivo JSON no tiene el formato esperado.');
+          return;
+        }
+        state = data;
+        saveState(state);
+        renderMatches(state, matchesBody, filterJornadaSel.value, handleStateChanged);
+        renderStandings(state, standingsBody);
+        updateStatusBadge(state, statusBadge);
+        alert('Torneo cargado correctamente.');
+      } catch (err) {
+        alert('Error leyendo el archivo JSON: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+
+    // Permite volver a seleccionar el mismo archivo si hace falta
+    fileInput.value = '';
+  });
+
+  // Exportar JSON
+  btnExport.addEventListener('click', () => {
+    const dataStr = JSON.stringify(state, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'torneo_ajedrez_liga6.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+  });
+
+  // Resetear torneo
+  btnReset.addEventListener('click', () => {
+    if (!confirm('¿Reiniciar el torneo y borrar todos los resultados?')) {
+      return;
+    }
+    state = createInitialState();
+    saveState(state);
+    renderMatches(state, matchesBody, filterJornadaSel.value, handleStateChanged);
+    renderStandings(state, standingsBody);
+    updateStatusBadge(state, statusBadge);
+  });
+});
+</script>
+</body>
+</html>
