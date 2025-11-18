@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="es">
 <head>
@@ -13,24 +12,157 @@
   >
 
   <style>
+    /* Fondo general */
     body {
-      background-color: #f8f9fa;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #ffffff 0, #e9ecef 55%, #dee2e6 100%);
     }
+
     .table-sticky-header thead th {
       position: sticky;
       top: 0;
       background-color: #f8f9fa;
       z-index: 1;
     }
+
     .small-note {
+      font-size: 0.85rem;
+    }
+
+    /* Navbar con degradado */
+    .navbar-dark.bg-dark {
+      background: linear-gradient(135deg, #212529, #0d6efd);
+      box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.35);
+    }
+
+    .navbar-brand span.icon {
+      margin-right: .35rem;
+      font-size: 1.4rem;
+    }
+
+    /* Tarjetas con aspecto más moderno */
+    .card {
+      border-radius: 0.9rem;
+      border: none;
+      box-shadow: 0 0.2rem 0.9rem rgba(0, 0, 0, 0.09);
+    }
+
+    .card-header {
+      background: linear-gradient(
+        90deg,
+        rgba(13, 110, 253, 0.12),
+        rgba(13, 110, 253, 0.02)
+      );
+      border-bottom: 1px solid rgba(13, 110, 253, 0.25);
+      font-weight: 600;
+    }
+
+    /* Hover suave en filas */
+    table tbody tr:hover {
+      filter: brightness(1.02);
+    }
+
+    /* Colores según resultado de la partida */
+    .result-pending {
+      background-color: #ffffff;
+    }
+
+    .result-A {
+      box-shadow: inset 4px 0 0 #198754;
+      background-color: rgba(25, 135, 84, 0.08);
+    }
+
+    .result-B {
+      box-shadow: inset 4px 0 0 #0d6efd;
+      background-color: rgba(13, 110, 253, 0.08);
+    }
+
+    .result-D {
+      box-shadow: inset 4px 0 0 #ffc107;
+      background-color: rgba(255, 193, 7, 0.12);
+    }
+
+    /* Selects de equipos con color propio */
+    .team-select {
+      font-weight: 600;
+    }
+
+    .team-rojo {
+      border-color: #dc3545 !important;
+      background-color: #f8d7da;
+    }
+
+    .team-verde {
+      border-color: #198754 !important;
+      background-color: #d1e7dd;
+    }
+
+    .team-azul {
+      border-color: #0d6efd !important;
+      background-color: #cfe2ff;
+    }
+
+    .team-amarillo {
+      border-color: #ffc107 !important;
+      background-color: #fff3cd;
+    }
+
+    .team-negro {
+      border-color: #212529 !important;
+      background-color: #e2e3e5;
+    }
+
+    .team-blanco {
+      border-color: #adb5bd !important;
+      background-color: #ffffff;
+    }
+
+    /* Leyenda de equipos */
+    #teamsLegend .badge {
+      font-size: 0.9rem;
+      box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.10);
+    }
+
+    /* Clasificación: top 3 con medallas y colores */
+    .stand-pos-1 {
+      background: linear-gradient(90deg, #fff7d1, #ffe8a1);
+      font-weight: 700;
+    }
+
+    .stand-pos-2 {
+      background: linear-gradient(90deg, #f1f3f5, #dde1e6);
+      font-weight: 600;
+    }
+
+    .stand-pos-3 {
+      background: linear-gradient(90deg, #ffe5d0, #ffd0a3);
+      font-weight: 600;
+    }
+
+    .stand-pos-medal {
+      font-size: 1.05rem;
+      margin-right: 0.15rem;
+    }
+
+    /* Badge de estado partidas */
+    #statusBadge {
+      font-size: 0.85rem;
+      box-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.15);
+    }
+
+    footer {
       font-size: 0.8rem;
+      color: #6c757d;
     }
   </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
   <div class="container-fluid">
-    <span class="navbar-brand">Torneo de Ajedrez – Liga 6 equipos</span>
+    <span class="navbar-brand">
+      <span class="icon">♟️</span>
+      Torneo de Ajedrez – Liga 6 equipos
+    </span>
   </div>
 </nav>
 
@@ -127,7 +259,7 @@
 
     <!-- Clasificación -->
     <div class="col-lg-4 mb-3">
-      <div class="card">
+      <div class="card mb-2">
         <div class="card-header">
           Clasificación
         </div>
@@ -148,15 +280,16 @@
           </table>
         </div>
       </div>
-        <div class="card-body p-0">
-  <img src="src/iescamas.jpg"
-       alt="IES Camas" width="97%"
-      >
-</div>
+      <div class="card-body p-0 mt-2 text-center">
+        <img src="src/iescamas.jpg"
+             alt="IES Camas" width="97%" class="rounded">
+      </div>
     </div>
-
-  
   </div>
+
+  <footer class="mt-3 text-center">
+    <span>♟ Liga interna de Ajedrez – IES Camas</span>
+  </footer>
 
 </div>
 
@@ -204,27 +337,56 @@ function getTeamInfo(teamId, fallbackName = '') {
   };
 }
 
+/* Badge de color para cada jornada */
+function getJornadaBadgeClass(jornada) {
+  switch (jornada) {
+    case 1: return 'bg-danger';
+    case 2: return 'bg-primary';
+    case 3: return 'bg-success';
+    case 4: return 'bg-warning text-dark';
+    case 5: return 'bg-info text-dark';
+    default: return 'bg-secondary';
+  }
+}
+
+/* Aplica color al select de equipo según el id */
+function applyTeamSelectColor(select, teamId) {
+  select.classList.add('team-select');
+  select.classList.remove(
+    'team-rojo',
+    'team-verde',
+    'team-azul',
+    'team-amarillo',
+    'team-negro',
+    'team-blanco'
+  );
+
+  switch (teamId) {
+    case 'rojo':
+      select.classList.add('team-rojo');
+      break;
+    case 'verde':
+      select.classList.add('team-verde');
+      break;
+    case 'azul':
+      select.classList.add('team-azul');
+      break;
+    case 'amarillo':
+      select.classList.add('team-amarillo');
+      break;
+    case 'negro':
+      select.classList.add('team-negro');
+      break;
+    case 'blanco':
+      select.classList.add('team-blanco');
+      break;
+  }
+}
+
 /* ============================================================================
    GENERACIÓN INICIAL DEL TORNEO
    ========================================================================== */
 
-/**
- * Genera la estructura inicial:
- * - 6 equipos fijos
- * - Liga a doble equipo: todos contra todos una vez
- * - 5 jornadas × 3 mesas (15 partidas)
- *
- * La tabla de emparejamientos es una forma estándar de round-robin
- * para 6 equipos (Berger).
- *
- * Orden de equipos:
- *  1: Rojo
- *  2: Verde
- *  3: Azul
- *  4: Amarillo
- *  5: Negro
- *  6: Blanco
- */
 function createInitialState() {
   const teams = TEAM_DEFINITIONS.map(t => ({ id: t.id, name: t.name }));
 
@@ -288,11 +450,6 @@ function createInitialState() {
    PERSISTENCIA EN LOCALSTORAGE
    ========================================================================== */
 
-/**
- * Carga el estado desde localStorage.
- * Si no hay datos o son inválidos, devuelve null.
- * También migra datos antiguos (sin jornada/mesa) si hace falta.
- */
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -319,9 +476,6 @@ function loadState() {
   }
 }
 
-/**
- * Guarda el estado en localStorage.
- */
 function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
@@ -330,9 +484,6 @@ function saveState(state) {
    RENDERIZADO DE LEYENDA Y CLASIFICACIÓN
    ========================================================================== */
 
-/**
- * Renderiza la leyenda de equipos (badges con iconos y colores).
- */
 function renderTeamsLegend(container) {
   container.innerHTML = '';
   TEAM_DEFINITIONS.forEach(team => {
@@ -343,9 +494,6 @@ function renderTeamsLegend(container) {
   });
 }
 
-/**
- * Calcula las estadísticas de clasificación en base al estado.
- */
 function computeStandings(state) {
   const stats = {};
 
@@ -396,23 +544,31 @@ function computeStandings(state) {
   });
 }
 
-/**
- * Renderiza la clasificación en la tabla correspondiente.
- */
 function renderStandings(state, standingsBody) {
   const tableData = computeStandings(state);
   standingsBody.innerHTML = '';
 
   tableData.forEach((team, index) => {
     const tr = document.createElement('tr');
+
+    let medal = '';
     if (index === 0) {
-      tr.classList.add('table-success');
+      tr.classList.add('stand-pos-1');
+      medal = '🥇';
+    } else if (index === 1) {
+      tr.classList.add('stand-pos-2');
+      medal = '🥈';
+    } else if (index === 2) {
+      tr.classList.add('stand-pos-3');
+      medal = '🥉';
     }
 
     const info = getTeamInfo(team.id, team.name);
 
     const tdPos = document.createElement('td');
-    tdPos.textContent = index + 1;
+    tdPos.innerHTML = medal
+      ? `<span class="stand-pos-medal">${medal}</span>${index + 1}`
+      : index + 1;
 
     const tdName = document.createElement('td');
     tdName.innerHTML =
@@ -449,9 +605,6 @@ function renderStandings(state, standingsBody) {
    RENDERIZADO DE PARTIDAS (CALENDARIO)
    ========================================================================== */
 
-/**
- * Crea un <select> de equipos para Equipo A o B.
- */
 function createTeamSelect(which, match, state, onChangeCallback) {
   const select = document.createElement('select');
   select.className = 'form-select form-select-sm';
@@ -460,12 +613,13 @@ function createTeamSelect(which, match, state, onChangeCallback) {
     const info = getTeamInfo(team.id, team.name);
     const opt = document.createElement('option');
     opt.value = team.id;
-    // En option sólo texto plano
     opt.textContent = `${info.icon} ${info.name}`;
     select.appendChild(opt);
   });
 
+  // Valor inicial
   select.value = which === 'A' ? match.teamA : match.teamB;
+  applyTeamSelectColor(select, select.value);
 
   select.addEventListener('change', () => {
     if (which === 'A') {
@@ -478,15 +632,13 @@ function createTeamSelect(which, match, state, onChangeCallback) {
       alert('Un equipo no puede jugar contra sí mismo. Cambia uno de los dos.');
     }
 
+    applyTeamSelectColor(select, select.value);
     onChangeCallback();
   });
 
   return select;
 }
 
-/**
- * Renderiza el estado de partidas jugadas en el badge superior.
- */
 function updateStatusBadge(state, statusBadge) {
   const played = state.matches.filter(
     m => m.result && m.result !== 'pending'
@@ -495,9 +647,6 @@ function updateStatusBadge(state, statusBadge) {
   statusBadge.textContent = `${played} / ${total} partidas jugadas`;
 }
 
-/**
- * Renderiza la tabla de partidas, respetando el filtro de jornada.
- */
 function renderMatches(state, matchesBody, filterJornadaValue, onStateChanged) {
   matchesBody.innerHTML = '';
 
@@ -516,6 +665,12 @@ function renderMatches(state, matchesBody, filterJornadaValue, onStateChanged) {
       const tr = document.createElement('tr');
       tr.dataset.matchId = match.id;
 
+      function applyResultStyle() {
+        tr.classList.remove('result-A', 'result-B', 'result-D', 'result-pending');
+        const cls = 'result-' + (match.result || 'pending');
+        tr.classList.add(cls);
+      }
+
       // #
       const tdId = document.createElement('td');
       tdId.textContent = match.id;
@@ -523,8 +678,9 @@ function renderMatches(state, matchesBody, filterJornadaValue, onStateChanged) {
 
       // Jornada
       const tdJornada = document.createElement('td');
-      tdJornada.textContent = match.jornada;
       tdJornada.classList.add('text-center');
+      tdJornada.innerHTML =
+        `<span class="badge ${getJornadaBadgeClass(match.jornada)}">J${match.jornada}</span>`;
 
       // Mesa
       const tdMesa = document.createElement('td');
@@ -577,6 +733,7 @@ function renderMatches(state, matchesBody, filterJornadaValue, onStateChanged) {
       selectResult.value = match.result || 'pending';
       selectResult.addEventListener('change', () => {
         match.result = selectResult.value;
+        applyResultStyle();
         onStateChanged(true); // true → recalcular también clasificación
       });
       tdResult.appendChild(selectResult);
@@ -604,6 +761,7 @@ function renderMatches(state, matchesBody, filterJornadaValue, onStateChanged) {
       tr.appendChild(tdResult);
       tr.appendChild(tdNote);
 
+      applyResultStyle();
       matchesBody.appendChild(tr);
     });
 }
@@ -613,7 +771,6 @@ function renderMatches(state, matchesBody, filterJornadaValue, onStateChanged) {
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Referencias a elementos del DOM
   const matchesBody      = document.getElementById('matchesBody');
   const standingsBody    = document.getElementById('standingsBody');
   const statusBadge      = document.getElementById('statusBadge');
@@ -624,13 +781,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterJornadaSel = document.getElementById('filterJornada');
   const teamsLegend      = document.getElementById('teamsLegend');
 
-  // Estado de la aplicación
   let state = loadState() || createInitialState();
 
-  /**
-   * Se ejecuta siempre que cambie algo del estado.
-   * @param {boolean} recalcStandings - si true, recalcula clasificación.
-   */
   function handleStateChanged(recalcStandings = false) {
     saveState(state);
     updateStatusBadge(state, statusBadge);
@@ -645,9 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderStandings(state, standingsBody);
   updateStatusBadge(state, statusBadge);
 
-  /* ----------------- Eventos de botones y filtros ----------------- */
-
-  // Cambiar filtro de jornada
+  // Filtro de jornada
   filterJornadaSel.addEventListener('change', () => {
     renderMatches(state, matchesBody, filterJornadaSel.value, handleStateChanged);
   });
@@ -681,7 +831,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     reader.readAsText(file);
 
-    // Permite volver a seleccionar el mismo archivo si hace falta
     fileInput.value = '';
   });
 
